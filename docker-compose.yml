@@ -1,0 +1,95 @@
+version: '3.8'
+
+volumes:
+  bert-models:
+  openwebui-data:
+  langfuse-data:
+  searxng-data:
+  llamaindex-data:
+  neo4j-data:
+  portainer-data:
+
+networks:
+  dabotman-net:
+    driver: bridge
+
+services:
+  bert:
+    build:
+      context: .
+      dockerfile: Dockerfile.bert
+    volumes:
+      - bert-models:/models
+    environment:
+      - BERT_MODEL=${BERT_MODEL}
+    networks:
+      - dabotman-net
+
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:latest
+    environment:
+      - DATABASE_URL=${DATABASE_URL_OPENWEBUI}
+    volumes:
+      - openwebui-data:/data
+    ports:
+      - "3000:8080"
+    networks:
+      - dabotman-net
+
+  langfuse:
+    image: langfuse/langfuse:latest
+    environment:
+      - DATABASE_URL=${DATABASE_URL_LANGFUSE}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+    volumes:
+      - langfuse-data:/var/lib/langfuse
+    ports:
+      - "3001:3000"
+    networks:
+      - dabotman-net
+
+  searxng:
+    image: searxng/searxng:latest
+    environment:
+      - BASE_URL=${SEARXNG_BASE_URL}
+    volumes:
+      - searxng-data:/etc/searxng
+    ports:
+      - "3002:8080"
+    networks:
+      - dabotman-net
+
+  llamaindex:
+    image: llamaindex/llamaindex:latest
+    environment:
+      - LLAMAINDEX_API_KEY=${LLAMAINDEX_API_KEY}
+    volumes:
+      - llamaindex-data:/data
+    ports:
+      - "3003:8080"
+    networks:
+      - dabotman-net
+
+  neo4j:
+    image: neo4j:5
+    volumes:
+      - neo4j-data:/data
+    environment:
+      - NEO4J_AUTH=${NEO4J_AUTH}
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    networks:
+      - dabotman-net
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    volumes:
+      - portainer-data:/data
+    ports:
+      - "9443:9443"
+    restart: unless-stopped
+    networks:
+      - dabotman-net
+
