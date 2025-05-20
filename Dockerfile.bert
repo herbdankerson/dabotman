@@ -1,0 +1,12 @@
+FROM python:3.10-slim
+
+RUN pip install --no-cache-dir transformers==4.36.2
+
+ARG BERT_MODEL=bert-base-uncased
+ENV BERT_MODEL=$BERT_MODEL
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["sleep", "infinity"]

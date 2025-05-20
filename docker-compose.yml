@@ -1,0 +1,125 @@
+version: '3.8'
+
+volumes:
+  bert-models:
+  openwebui-data:
+  langfuse-data:
+  searxng-data:
+  llamaindex-data:
+  neo4j-data:
+  portainer-data:
+  supabase-data:
+  tigergraph-data:
+  docling-data:
+
+networks:
+  dabotman-net:
+    driver: bridge
+
+services:
+  bert-base:
+    build:
+      context: .
+      dockerfile: Dockerfile.bert
+      args:
+        BERT_MODEL: bert-base-uncased
+    volumes:
+      - bert-models:/models
+    networks:
+      - dabotman-net
+
+  bert-large:
+    build:
+      context: .
+      dockerfile: Dockerfile.bert
+      args:
+        BERT_MODEL: bert-large-uncased
+    volumes:
+      - bert-models:/models
+    networks:
+      - dabotman-net
+
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:latest
+    volumes:
+      - openwebui-data:/data
+    ports:
+      - "3000:8080"
+    networks:
+      - dabotman-net
+
+  langfuse:
+    image: langfuse/langfuse:latest
+    volumes:
+      - langfuse-data:/var/lib/langfuse
+    ports:
+      - "3001:3000"
+    networks:
+      - dabotman-net
+
+  searxng:
+    image: searxng/searxng:latest
+    volumes:
+      - searxng-data:/etc/searxng
+    ports:
+      - "3002:8080"
+    networks:
+      - dabotman-net
+
+  llamaindex:
+    image: llamaindex/llamaindex:latest
+    volumes:
+      - llamaindex-data:/data
+    ports:
+      - "3003:8080"
+    networks:
+      - dabotman-net
+
+  neo4j:
+    image: neo4j:5
+    volumes:
+      - neo4j-data:/data
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    networks:
+      - dabotman-net
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    volumes:
+      - portainer-data:/data
+    ports:
+      - "9443:9443"
+    restart: unless-stopped
+    networks:
+      - dabotman-net
+
+  supabase:
+    image: supabase/postgres:latest
+    volumes:
+      - supabase-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - dabotman-net
+
+  tigergraph:
+    image: tigergraph/tigergraph:latest
+    volumes:
+      - tigergraph-data:/data
+    ports:
+      - "14240:14240"
+      - "9000:9000"
+    networks:
+      - dabotman-net
+
+  docling:
+    image: docling/docling:latest
+    volumes:
+      - docling-data:/data
+    ports:
+      - "8501:8501"
+    networks:
+      - dabotman-net
+
